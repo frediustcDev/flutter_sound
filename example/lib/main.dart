@@ -37,6 +37,27 @@ class _MyAppState extends State<MyApp> {
   PlaybackState _playbackState;
   bool _sliderIsChanging = false;
 
+  List<bool> _repeatMode = [true, false];
+  final List<REPEAT_MODE> _repeatModeList = [REPEAT_MODE.NONE, REPEAT_MODE.ONE];
+
+  setRepeatHanlder(int i) {
+    setState(() {
+      List.generate(_repeatMode.length, (index) {
+        if (index == i) {
+          _repeatMode[i] = !_repeatMode[i];
+        } else {
+          _repeatMode[index] = false;
+        }
+      });
+    });
+
+    if (_repeatMode[i]) {
+      flutterSound.setRepeatMode(_repeatModeList[i]);
+    } else {
+      flutterSound.setRepeatMode(REPEAT_MODE.NONE);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -353,6 +374,23 @@ class _MyAppState extends State<MyApp> {
                   },
                   divisions: maxDuration.toInt()),
             ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    'Repeat Mode:',
+                    style: Theme.of(context).textTheme.headline5,
+                  ),
+                ),
+                ToggleButtons(
+                  children: <Widget>[Text('NONE'), Text('ONE')],
+                  isSelected: _repeatMode,
+                  onPressed: setRepeatHanlder,
+                )
+              ],
+            )
           ],
         ),
       ),

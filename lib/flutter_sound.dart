@@ -8,6 +8,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_sound/android_encoder.dart';
 import 'package:flutter_sound/ios_quality.dart';
 
+//adding repeat mode to it
+enum REPEAT_MODE { NONE, ALL, ONE, SHUFFLE }
+
 class FlutterSound {
   static const MethodChannel _channel = const MethodChannel('flutter_sound');
   static StreamController<RecordStatus> _recorderController;
@@ -37,6 +40,15 @@ class FlutterSound {
   bool _skipTrackForwardHandlerSet = false;
   // Whether the handler for when the user tries to skip backward was set
   bool _skipTrackBackwardHandlerSet = false;
+
+  //repeat mode
+  REPEAT_MODE _repeatMode = REPEAT_MODE.NONE;
+
+  REPEAT_MODE get repeatMode => _repeatMode;
+
+  setRepeatMode(REPEAT_MODE repeatMode) {
+    _repeatMode = repeatMode;
+  }
 
   // The handlers for when a Dart method is invoked from the native code
   Map<String, Function(MethodCall)> _callHandlers =
@@ -77,8 +89,22 @@ class FlutterSound {
           status.currentPosition = status.duration;
         }
         if (_playerController != null) _playerController.add(status);
-        this._isPlaying = false;
-        _removePlayerCallback();
+
+        //handle repeat Mode on music end
+        switch (_repeatMode) {
+          case REPEAT_MODE.ONE:
+            seekToPlayer(0);
+            resumePlayer();
+            print('repeat_one');
+            break;
+          // break;
+          case REPEAT_MODE.ALL:
+          case REPEAT_MODE.NONE:
+          default:
+            this._isPlaying = false;
+            _removePlayerCallback();
+            break;
+        }
       }
     });
   }
